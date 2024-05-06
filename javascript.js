@@ -13,11 +13,13 @@ function createPlayer (player) {
 
     return { addWin, selectedPlayer, getWinsRecord, addLoss, getLosesRecord}
 }
+
 const playerX = createPlayer("x");
 const playerO = createPlayer("o")
 let firstPlayer;
+let secondPlayer;
 
-
+const gameboardSection = document.getElementById('gameboardSection')
 const formSection = document.getElementById('formSection')
 
 const form = document.createElement('form');
@@ -51,10 +53,12 @@ form.appendChild(submit);
 form.onsubmit = (e) => {
     e.preventDefault()
     if (radioX.checked) {
-        firstPlayer = playerX;
+        firstPlayer = playerX.selectedPlayer;
+        secondPlayer = playerO.selectedPlayer;
         
     } else if (radioO.checked) {
-        firstPlayer = playerO;
+        firstPlayer = playerO.selectedPlayer;
+        secondPlayer = playerX.selectedPlayer;
     } else {
         alert("Pick a symbol!")
         return
@@ -62,6 +66,41 @@ form.onsubmit = (e) => {
     
 }
 
+function createGameboard() {
+    let turn = 1;
+    let tilesArray = [1,2,3,4,5,6,7,8,9]
+    
+    const changeTurn = () => { turn++ }
+    const getTurn = () => turn 
+    const paintGb = () => {
+        tilesArray.forEach( (el) => {
+            const tile = document.createElement('div');
+            tile.classList.add('tile')
+            tile.innerText = el
+            gameboardSection.appendChild(tile)
+        })
+    }
+
+
+    return { changeTurn, paintGb, getTurn }
+}
+const gb = createGameboard()
+gb.paintGb()
+const tiles = document.querySelectorAll('.tile')
+tiles.forEach( (tile) => {
+    tile.addEventListener('click', () => {
+        let turn = gb.getTurn()
+        console.log(turn)
+        if (turn% 2 === 0) {
+            tile.innerText = `${firstPlayer}`;
+            gb.changeTurn()
+        } else {
+            tile.innerText = `${secondPlayer}`;
+            gb.changeTurn()
+        }
+        /* falta que con cada click chequee win/lose/tie conditions y que se auto deinhabilite el event listener del tile */
+    }) 
+})
 
 
 
