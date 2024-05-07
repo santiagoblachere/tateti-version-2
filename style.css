@@ -6,8 +6,14 @@
     grid-template-rows: repeat(3, 1fr);
 }
 .tile {
-    
-    border: 1px solid black;
+    color: white;
+    background-color: black;
+    border: 1px solid white;
+    font-size: 50px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .clicked {
     background-color: brown;

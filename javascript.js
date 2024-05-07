@@ -1,5 +1,5 @@
 /* USER FACTORY */
-
+let ties = 0
 function createPlayer (player) {
     const selectedPlayer = player;
     let wins = 0;
@@ -22,10 +22,15 @@ NodeList.prototype.indexOf = Array.prototype.indexOf;
 
 const gameboardSection = document.getElementById('gameboardSection')
 const formSection = document.getElementById('formSection')
+const statSection = document.getElementById('statsContainer');
+const stats = document.createElement('div'); 
+statSection.appendChild(stats)
 
 const form = document.createElement('form');
 formSection.appendChild(form)
-
+const legend = document.createElement('legend');
+legend.innerText = "WHO STARTS?";
+form.appendChild(legend)
 const radioX = document.createElement('input');
 radioX.setAttribute('name', 'player');
 radioX.setAttribute('id', 'playerX');
@@ -53,6 +58,7 @@ form.appendChild(submit);
 
 form.onsubmit = (e) => {
     e.preventDefault()
+    console.log(radioO.checked)
     console.log(radioX.checked)
     if (radioX.checked) {
         firstPlayer = playerX.selectedPlayer;
@@ -71,34 +77,85 @@ form.onsubmit = (e) => {
 function createGameboard() {
     let turn = 0;
     let tilesArray = [1,2,3,4,5,6,7,8,9]
-    
+    function tileClickHandler() {
+        
+        if (firstPlayer === undefined) {
+            return
+        }
+        let turn = gb.getTurn()
+        tieCondition(tiles)
+        if (turn% 2 === 0) {
+            this.innerText = `${firstPlayer}`;
+            
+            
+        } else {
+            this.innerText = `${secondPlayer}`;
+            
+        }
+        
+        this.removeEventListener('click', tileClickHandler)
+        gb.changeTurn();
+        checkConditions(tiles)  
+        
+    }
     const changeTurn = () => { turn++ }
     const getTurn = () => turn 
+    const displayStats = (() => {
+        let winsX = playerX.getWinsRecord();
+        let winsO = playerO.getWinsRecord();
+        
+        stats.innerText = `
+                            X WINS = ${winsX};
+                            O WINS = ${winsO};
+                            TIES = ${ties}
+        
+        `
+        
+
+    })()
+    const updateStats = () => {
+        let winsX = playerX.getWinsRecord();
+        let winsO = playerO.getWinsRecord();    
+        stats.innerText = `
+                            X WINS = ${winsX};
+                            O WINS = ${winsO};
+                            TIES = ${ties}
+        
+        `
+    }
+    const tieCondition = (array) => {
+        let counterTiles = 0;
+        
+        for (let i = 0; i < array.length; i++) {
+            if (array[i].innerText.trim() !== "") {
+                 counterTiles++
+                 
+        }
+        if (counterTiles === 9) {
+            return true
+        }
+    }
+    }   
     const paintGb = () => {
+        
         tilesArray.forEach( (el) => {
             const tile = document.createElement('div');
             tile.classList.add('tile')
-            tile.innerText = el
+            tile.innerText = ""
             gameboardSection.appendChild(tile)
-            tile.addEventListener('click', () => {
-                let turn = gb.getTurn()
-                
-                if (turn% 2 === 0) {
-                    tile.innerText = `${firstPlayer}`;
-                    
-                    gb.changeTurn()
-                } else {
-                    tile.innerText = `${secondPlayer}`;
-                    gb.changeTurn()
-                }
-                checkConditions(tiles)
-                /* falta que con cada click chequee win/lose/tie conditions y que se auto deinhabilite el event listener del tile */
-            })
+            
+            tile.addEventListener('click', tileClickHandler)
         })
     }
     const resetGb = (tiles) => {
+        firstPlayer = undefined;
+        secondPlayer = undefined;
+        turn = 0;
         tiles.forEach( (tile) => {
+            console.log(tile)
             tile.innerText = ""
+            tile.removeEventListener('click', tileClickHandler)
+            tile.addEventListener('click', tileClickHandler)
         })
     }
     const checkConditions = (tiles) => {
@@ -114,9 +171,10 @@ function createGameboard() {
         {
             playerX.addWin()
             playerO.addLoss()
-            resetGb(tiles);
-            console.log(playerX.getWinsRecord())
-            console.log(playerO.getLosesRecord())
+            
+            alert("X WINS!")
+            
+            
         }
         else if ( (tiles[0].innerText === "o" && tiles[1].innerText === "o" && tiles[2].innerText === "o") ||
         (tiles[3].innerText === "o" && tiles[4].innerText === "o" && tiles[5].innerText === "o") || 
@@ -130,23 +188,30 @@ function createGameboard() {
    ){
             playerO.addWin()
             playerX.addLoss()
-            resetGb(tiles);
-            console.log(playerO.getWinsRecord())
-            console.log(playerX.getLosesRecord())
+            
+            alert("O WINS!")
+            
+            
         }
+        else if ( tieCondition(tiles) === true) {
+            ties++
+            
+            
+            alert("ITS A TIE!")
+            
+        } else {
+            return
+        }
+        resetGb(tiles);
+        updateStats()
 
-    }
+    } 
 
 
     return { changeTurn, paintGb, getTurn, tilesArray, checkConditions }
 }
+
 const gb = createGameboard()
 gb.paintGb()
 const tiles = document.querySelectorAll('.tile')
-
-
-
-
-
-
 
